@@ -6,6 +6,14 @@
   "bin": {
     "komitto": "./bin/komitto.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wtfz/ai-komitto"
+  },
+  "bugs": {
+    "url": "https://github.com/wtfz/ai-komitto/issues"
+  },
+  "homepage": "https://github.com/wtfz/ai-komitto#readme",
   "files": [
     "bin",
     "lib",
@@ -18,14 +26,13 @@
   "keywords": [
     "git",
     "commit",
-    "commit-message",
     "openai",
     "claude",
     "gemini",
     "cli",
-    "ai-commit",
-    "ai-commit-message",
+    "ai",
     "komitto"
   ],
+  "author": "wtfz <ahmadzaimhamzah@gmail.com>",
   "license": "MIT"
 }
