@@ -1,4 +1,12 @@
-# ai-komitto
+<p align="center"><a href="https://www.npmjs.com/package/ai-komitto" target="_blank"><img src="https://raw.githubusercontent.com/wtfz/asset/master/ai-komitto-logo.png" width="400" alt="AI Komitto Logo"></a></p>
+
+<p align="center">
+[![npm version](https://img.shields.io/npm/v/ai-komitto.svg)](https://www.npmjs.com/package/ai-komitto)
+[![npm downloads](https://img.shields.io/npm/dm/ai-komitto.svg)](https://www.npmjs.com/package/ai-komitto)
+[![npm license](https://img.shields.io/npm/l/ai-komitto.svg)](https://www.npmjs.com/package/ai-komitto)
+</p>
+
+## About AI Komitto
 
 Generate short Git commit messages from your staged diff using OpenAI, Claude, or Gemini.
 
