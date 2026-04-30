@@ -28,6 +28,9 @@ komitto
 - Print-only mode for editor aliases and IDE tasks
 - Lowercase one-line conventional-style commit messages
 - Optional `--no-add` mode when you only want to summarize already staged files
+- Configurable max word count for commit messages
+- Multiple commit formats: plain, conventional, gitmoji, full (title + body)
+- Custom context instructions to guide the commit message tone and content
 
 ## Why
 
@@ -159,6 +162,8 @@ export KOMITTO_PROVIDER="gemini"
 export GEMINI_API_KEY="your_gemini_api_key"
 export GEMINI_MODEL="gemini-flash-lite-latest"
 export KOMITTO_LANGUAGE="english"
+export KOMITTO_FORMAT="conventional"
+export KOMITTO_CONTEXT="reference exact function names modified"
 ```
 
 Reload your shell:
@@ -216,6 +221,45 @@ Limit the diff size sent to the provider:
 
 ```bash
 komitto --max-chars 12000
+```
+
+Limit the commit message word count:
+
+```bash
+komitto --max-words 8
+```
+
+Use a specific commit format:
+
+```bash
+komitto --format plain
+komitto --format conventional
+komitto --format gitmoji
+komitto --format full
+```
+
+Possible gitmoji output:
+
+```text
+✨ add user avatar upload endpoint
+```
+
+Possible full output:
+
+```text
+feat: add user avatar upload endpoint
+
+- add POST /api/avatar route with multer middleware
+- validate file size and type before saving
+- update user model with avatarUrl field
+```
+
+Add custom context to guide the commit message:
+
+```bash
+komitto --context "prioritize the performance effects of the updates"
+komitto --context "reference the exact function names and file paths modified"
+komitto --context "use gen alpha vibes terminology"
 ```
 
 Show help:
@@ -284,6 +328,9 @@ Environment variables:
 | `OPENAI_MODEL` | OpenAI model | `gpt-5.4-nano` |
 | `CLAUDE_MODEL` | Claude model | `claude-haiku-4-5` |
 | `KOMITTO_MAX_CHARS` | Maximum diff characters sent to the provider | `18000` |
+| `KOMITTO_MAX_WORDS` | Maximum words in the commit message | `12` |
+| `KOMITTO_FORMAT` | Commit format: `plain`, `conventional`, `gitmoji`, `full` | `conventional` |
+| `KOMITTO_CONTEXT` | Extra instructions for commit message generation | none |
 
 CLI options override environment variables.
 
@@ -304,6 +351,9 @@ komitto [options]
 | `--print` | Print the message only, do not commit |
 | `--dry-run` | Same as `--print` |
 | `--max-chars <number>` | Maximum diff characters sent to the provider |
+| `-w, --max-words <n>` | Maximum words in the commit message, default: `12` |
+| `-f, --format <type>` | Commit format: `plain`, `conventional`, `gitmoji`, `full` |
+| `-c, --context <text>` | Extra instructions for the commit message |
 | `-h, --help` | Show help |
 
 ## Default models

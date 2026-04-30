@@ -28,7 +28,10 @@ async function main() {
   }
 
   const diff = getDiff(args);
-  const prompt = buildPrompt(diff, args.language || 'english');
+  const maxWords = parseInt(args.maxWords || process.env.KOMITTO_MAX_WORDS || '12', 10);
+  const format = args.format || process.env.KOMITTO_FORMAT || 'conventional';
+  const context = args.context || process.env.KOMITTO_CONTEXT || '';
+  const prompt = buildPrompt(diff, args.language || 'english', maxWords, format, context);
 
   let message;
 
@@ -42,7 +45,7 @@ async function main() {
     throw new Error(`unsupported provider: ${provider}. use openai, claude, or gemini`);
   }
 
-  message = cleanMessage(message);
+  message = cleanMessage(message, format);
 
   if (!message) {
     throw new Error('provider returned an empty commit message');
