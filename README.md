@@ -28,7 +28,7 @@ komitto
 - Print-only mode for editor aliases and IDE tasks
 - Lowercase one-line conventional-style commit messages
 - Optional `--no-add` mode when you only want to summarize already staged files
-- Configurable max word count for commit messages
+- Configurable min word count for commit messages
 - Multiple commit formats: plain, conventional, gitmoji, full (title + body)
 - Custom context instructions to guide the commit message tone and content
 
@@ -223,10 +223,10 @@ Limit the diff size sent to the provider:
 komitto --max-chars 12000
 ```
 
-Limit the commit message word count:
+Set minimum word count for commit message:
 
 ```bash
-komitto --max-words 8
+komitto --min-words 8
 ```
 
 Use a specific commit format:
@@ -328,13 +328,11 @@ Environment variables:
 | `OPENAI_MODEL` | OpenAI model | `gpt-5.4-nano` |
 | `CLAUDE_MODEL` | Claude model | `claude-haiku-4-5` |
 | `KOMITTO_MAX_CHARS` | Maximum diff characters sent to the provider | `18000` |
-| `KOMITTO_MAX_WORDS` | Maximum words in the commit message | `12` |
+| `KOMITTO_MIN_WORDS` | Minimum words in the commit message | `12` |
 | `KOMITTO_FORMAT` | Commit format: `plain`, `conventional`, `gitmoji`, `full` | `conventional` |
 | `KOMITTO_CONTEXT` | Extra instructions for commit message generation | none |
 
 CLI options override environment variables.
-
-Legacy `AIC_PROVIDER`, `AIC_LANGUAGE`, and `AIC_MAX_CHARS` are also supported for compatibility.
 
 ## CLI options
 
@@ -351,7 +349,7 @@ komitto [options]
 | `--print` | Print the message only, do not commit |
 | `--dry-run` | Same as `--print` |
 | `--max-chars <number>` | Maximum diff characters sent to the provider |
-| `-w, --max-words <n>` | Maximum words in the commit message, default: `12` |
+| `-w, --min-words <n>` | Minimum words in the commit message, default: `12` |
 | `-f, --format <type>` | Commit format: `plain`, `conventional`, `gitmoji`, `full` |
 | `-c, --context <text>` | Extra instructions for the commit message |
 | `-h, --help` | Show help |

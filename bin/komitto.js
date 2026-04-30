@@ -14,7 +14,7 @@ async function main() {
     return;
   }
 
-  const provider = args.provider || process.env.KOMITTO_PROVIDER || process.env.AIC_PROVIDER || 'gemini';
+  const provider = args.provider || process.env.KOMITTO_PROVIDER || 'gemini';
   const root = git(['rev-parse', '--show-toplevel']).trim();
 
   if (args.add !== false) {
@@ -28,10 +28,10 @@ async function main() {
   }
 
   const diff = getDiff(args);
-  const maxWords = parseInt(args.maxWords || process.env.KOMITTO_MAX_WORDS || '12', 10);
+  const minWords = parseInt(args.minWords || process.env.KOMITTO_MIN_WORDS || '12', 10);
   const format = args.format || process.env.KOMITTO_FORMAT || 'conventional';
   const context = args.context || process.env.KOMITTO_CONTEXT || '';
-  const prompt = buildPrompt(diff, args.language || 'english', maxWords, format, context);
+  const prompt = buildPrompt(diff, args.language || 'english', minWords, format, context);
 
   let message;
 
@@ -72,7 +72,7 @@ function getDiff(args) {
   const stat = git([...diffArgs, '--stat']);
   const body = git([...diffArgs, '--', '.', ...lockfileExcludes]);
 
-  const maxChars = Number(args.maxChars || process.env.KOMITTO_MAX_CHARS || process.env.AIC_MAX_CHARS || 18000);
+  const maxChars = Number(args.maxChars || process.env.KOMITTO_MAX_CHARS || 18000);
   return `${stat}\n\n${body}`.slice(0, maxChars);
 }
 
