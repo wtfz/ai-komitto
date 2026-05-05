@@ -26,7 +26,7 @@ komitto
 - Provider and model overrides
 - Language option, defaulting to English
 - Print-only mode for editor aliases and IDE tasks
-- Lowercase one-line conventional-style commit messages
+- Optional --lowercase flag to transform commit message to lowercase
 - Optional `--no-add` mode when you only want to summarize already staged files
 - Configurable min word count for commit messages
 - Multiple commit formats: plain, conventional, gitmoji, full (title + body)
@@ -404,9 +404,14 @@ git commit -m "<generated-message>"
 The generated message is normalized before commit:
 
 - first line only
-- lowercase
 - surrounding quotes removed
 - trailing period removed
+
+To force lowercase output, use the `--lowercase` or `-lc` flag:
+
+```bash
+komitto --lowercase
+```
 
 ## Examples
 

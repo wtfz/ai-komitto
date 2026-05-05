@@ -50,6 +50,10 @@ async function main() {
 
   message = cleanMessage(message, format);
 
+  if (args.lowercase) {
+    message = message.toLowerCase();
+  }
+
   if (!message) {
     throw new Error('provider returned an empty commit message');
   }
