@@ -8,7 +8,7 @@
 
 ## About AI Komitto
 
-Generate short Git commit messages from your staged diff using OpenAI, Claude, or Gemini.
+Generate short Git commit messages from your staged diff using OpenAI, Claude, Gemini or DeepSeek.
 
 AI Komitto is a small global CLI for developers who want fast commit messages without manually writing summaries. It stages your repository changes, sends the staged diff to your selected AI provider, prints the generated message, and commits with that message.
 
@@ -20,7 +20,7 @@ komitto
 
 ## Features
 
-- Supports Google Gemini, OpenAI, and Anthropic Claude
+- Supports Google Gemini, OpenAI, Anthropic Claude, and DeepSeek
 - Global npm CLI installation
 - Default lightweight model support
 - Provider and model overrides
@@ -93,8 +93,6 @@ export GEMINI_API_KEY="your_gemini_api_key"
 export GEMINI_MODEL="gemini-flash-lite-latest"
 ```
 
-Gemini is the default provider if `KOMITTO_PROVIDER` is not set.
-
 ### OpenAI
 
 ```bash
@@ -110,6 +108,16 @@ export KOMITTO_PROVIDER="claude"
 export ANTHROPIC_API_KEY="your_anthropic_api_key"
 export CLAUDE_MODEL="claude-haiku-4-5"
 ```
+
+### DeepSeek
+
+```bash
+export KOMITTO_PROVIDER="deepseek"
+export DEEPSEEK_API_KEY="your_deepseek_api_key"
+export DEEPSEEK_MODEL="deepseek-v4-flash"
+```
+
+DeepSeek is the default provider if `KOMITTO_PROVIDER` is not set.
 
 ## Language
 
@@ -304,6 +312,7 @@ commitmsg
 alias commitg="komitto --provider gemini"
 alias commito="komitto --provider openai"
 alias commitc="komitto --provider claude"
+alias commitd="komitto --provider deepseek"
 ```
 
 ### Language-specific aliases
@@ -319,14 +328,16 @@ Environment variables:
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `KOMITTO_PROVIDER` | Default provider: `gemini`, `openai`, or `claude` | `gemini` |
+| `KOMITTO_PROVIDER` | Default provider: `gemini`, `openai`, `claude`, or `deepseek` | `deepseek` |
 | `KOMITTO_LANGUAGE` | Default commit message language | `english` |
 | `GEMINI_API_KEY` | Gemini API key | none |
 | `OPENAI_API_KEY` | OpenAI API key | none |
 | `ANTHROPIC_API_KEY` | Anthropic API key | none |
+| `DEEPSEEK_API_KEY` | DeepSeek API key | none |
 | `GEMINI_MODEL` | Gemini model | `gemini-flash-lite-latest` |
 | `OPENAI_MODEL` | OpenAI model | `gpt-5.4-nano` |
 | `CLAUDE_MODEL` | Claude model | `claude-haiku-4-5` |
+| `DEEPSEEK_MODEL` | DeepSeek model | `deepseek-v4-flash` |
 | `KOMITTO_MAX_CHARS` | Maximum diff characters sent to the provider | `18000` |
 | `KOMITTO_MIN_WORDS` | Minimum words in the commit message | `12` |
 | `KOMITTO_FORMAT` | Commit format: `plain`, `conventional`, `gitmoji`, `full` | `conventional` |
@@ -342,7 +353,7 @@ komitto [options]
 
 | Option | Description |
 | --- | --- |
-| `-p, --provider <name>` | Provider: `gemini`, `openai`, or `claude` |
+| `-p, --provider <name>` | Provider: `gemini`, `openai`, `claude`, or `deepseek` |
 | `-m, --model <model>` | Override provider model |
 | `-l, --language <name>` | Commit message language, default: `english` |
 | `--no-add` | Do not run `git add` before generating the message |
@@ -362,6 +373,7 @@ The package uses lightweight defaults intended for low-cost commit message gener
 gemini: gemini-flash-lite-latest
 openai: gpt-5.4-nano
 claude: claude-haiku-4-5
+deepseek: deepseek-v4-flash
 ```
 
 The Gemini default intentionally uses the latest alias-style model name:

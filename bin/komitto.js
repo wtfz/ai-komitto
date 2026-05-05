@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { generateWithOpenAI } from '../lib/providers/openai.js';
 import { generateWithClaude } from '../lib/providers/claude.js';
 import { generateWithGemini } from '../lib/providers/gemini.js';
+import { generateWithDeepSeek } from '../lib/providers/deepseek.js';
 import { buildPrompt, cleanMessage, parseArgs, usage } from '../lib/utils.js';
 
 async function main() {
@@ -14,7 +15,7 @@ async function main() {
     return;
   }
 
-  const provider = args.provider || process.env.KOMITTO_PROVIDER || 'gemini';
+  const provider = args.provider || process.env.KOMITTO_PROVIDER || 'deepseek';
   const root = git(['rev-parse', '--show-toplevel']).trim();
 
   if (args.add !== false) {
@@ -41,8 +42,10 @@ async function main() {
     message = await generateWithClaude(prompt, args.model);
   } else if (provider === 'gemini' || provider === 'google') {
     message = await generateWithGemini(prompt, args.model);
+  } else if (provider === 'deepseek') {
+    message = await generateWithDeepSeek(prompt, args.model);
   } else {
-    throw new Error(`unsupported provider: ${provider}. use openai, claude, or gemini`);
+    throw new Error(`unsupported provider: ${provider}. use openai, claude, gemini, or deepseek`);
   }
 
   message = cleanMessage(message, format);

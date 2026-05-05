@@ -1,7 +1,7 @@
 {
   "name": "ai-komitto",
-  "version": "0.1.6",
-  "description": "Generate short git commit messages from staged diffs using OpenAI, Claude, or Gemini.",
+  "version": "0.1.7",
+  "description": "Generate short git commit messages from staged diffs using OpenAI, Claude, Gemini or DeepSeek.",
   "type": "module",
   "bin": {
     "komitto": "./bin/komitto.js"
@@ -28,6 +28,7 @@
     "commit",
     "openai",
     "claude",
+    "deepseek",
     "gemini",
     "cli",
     "ai",
