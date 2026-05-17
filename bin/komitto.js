@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { generateWithOpenAI } from '../lib/providers/openai.js';
 import { generateWithClaude } from '../lib/providers/claude.js';
 import { generateWithGemini } from '../lib/providers/gemini.js';
@@ -28,7 +28,7 @@ async function main() {
     process.exit(1);
   }
 
-  const diff = getDiff(args);
+  const diff = await getDiff(args);
   const minWords = parseInt(args.minWords || process.env.KOMITTO_MIN_WORDS || '12', 10);
   const format = args.format || process.env.KOMITTO_FORMAT || 'conventional';
   const context = args.context || process.env.KOMITTO_CONTEXT || '';
@@ -67,7 +67,7 @@ async function main() {
   git(['commit', '-m', message], { stdio: 'inherit' });
 }
 
-function getDiff(args) {
+async function getDiff(args) {
   const lockfileExcludes = [
     ':(exclude)package-lock.json',
     ':(exclude)yarn.lock',
@@ -76,17 +76,53 @@ function getDiff(args) {
   ];
 
   const diffArgs = ['diff', '--cached'];
-  const stat = git([...diffArgs, '--stat']);
-  const body = git([...diffArgs, '--', '.', ...lockfileExcludes]);
-
   const maxChars = Number(args.maxChars || process.env.KOMITTO_MAX_CHARS || 18000);
-  return `${stat}\n\n${body}`.slice(0, maxChars);
+
+  const stat = git([...diffArgs, '--stat']);
+  const body = await gitStream([...diffArgs, '--', '.', ...lockfileExcludes], maxChars - stat.length - 2);
+
+  return `${stat}\n\n${body}`;
 }
 
 function git(args, options = {}) {
   return execFileSync('git', args, {
     encoding: 'utf8',
+    maxBuffer: 50 * 1024 * 1024,
     stdio: options.stdio || ['ignore', 'pipe', 'pipe']
+  });
+}
+
+function gitStream(args, limit) {
+  return new Promise((resolve, reject) => {
+    const child = spawn('git', args, {
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    let output = '';
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      child.kill();
+      resolve(output);
+    };
+
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => {
+      output += chunk;
+      if (output.length >= limit) {
+        output = output.slice(0, limit);
+        child.kill();
+      }
+    });
+
+    child.on('close', () => finish());
+    child.on('error', (err) => {
+      if (done) return;
+      done = true;
+      reject(err);
+    });
   });
 }
 
