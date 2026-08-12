@@ -28,6 +28,7 @@ komitto
 - Print-only mode for editor aliases and IDE tasks
 - Optional --lowercase flag to transform commit message to lowercase
 - Optional `--no-add` mode when you only want to summarize already staged files
+- Automatic linear retries when a provider returns an empty commit message
 - Configurable min word count for commit messages
 - Multiple commit formats: plain, conventional, gitmoji, full (title + body)
 - Custom context instructions to guide the commit message tone and content
@@ -172,6 +173,8 @@ export GEMINI_MODEL="gemini-flash-lite-latest"
 export KOMITTO_LANGUAGE="english"
 export KOMITTO_FORMAT="conventional"
 export KOMITTO_CONTEXT="reference exact function names modified"
+export KOMITTO_MAX_TURNS="5"
+export KOMITTO_RETRY_DELAY="1"
 ```
 
 Reload your shell:
@@ -230,6 +233,14 @@ Limit the diff size sent to the provider:
 ```bash
 komitto --max-chars 12000
 ```
+
+Retry empty provider responses up to five total turns with a one-second linear delay:
+
+```bash
+komitto --max-turns 5 --retry-delay 1
+```
+
+The command stays open and reuses the same prompt. With the settings above, it waits 1, 2, 3, then 4 seconds after consecutive empty responses. Provider errors such as invalid credentials, rate limits, HTTP failures, and network failures are not retried. Set `--max-turns 1` to disable retries.
 
 Set minimum word count for commit message:
 
@@ -342,6 +353,8 @@ Environment variables:
 | `KOMITTO_MIN_WORDS` | Minimum words in the commit message | `12` |
 | `KOMITTO_FORMAT` | Commit format: `plain`, `conventional`, `gitmoji`, `full` | `conventional` |
 | `KOMITTO_CONTEXT` | Extra instructions for commit message generation | none |
+| `KOMITTO_MAX_TURNS` | Maximum provider calls when responses are empty | `5` |
+| `KOMITTO_RETRY_DELAY` | Base delay in seconds for linear retries | `1` |
 
 CLI options override environment variables.
 
@@ -363,6 +376,8 @@ komitto [options]
 | `-w, --min-words <n>` | Minimum words in the commit message, default: `12` |
 | `-f, --format <type>` | Commit format: `plain`, `conventional`, `gitmoji`, `full` |
 | `-c, --context <text>` | Extra instructions for the commit message |
+| `--max-turns <number>` | Maximum provider calls for empty responses, default: `5` |
+| `--retry-delay <seconds>` | Base delay for linear retries, default: `1` |
 | `-h, --help` | Show help |
 
 ## Default models

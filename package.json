@@ -24,6 +24,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "test": "node --test",
     "push": "git push origin master",
     "login": "npm login",
     "publish": "npm publish"

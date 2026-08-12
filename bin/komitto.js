@@ -5,7 +5,8 @@ import { generateWithOpenAI } from '../lib/providers/openai.js';
 import { generateWithClaude } from '../lib/providers/claude.js';
 import { generateWithGemini } from '../lib/providers/gemini.js';
 import { generateWithDeepSeek } from '../lib/providers/deepseek.js';
-import { buildPrompt, cleanMessage, parseArgs, usage } from '../lib/utils.js';
+import { generateCommitMessageWithRetry } from '../lib/retry.js';
+import { buildPrompt, parseArgs, parseRetryOptions, usage } from '../lib/utils.js';
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -15,6 +16,7 @@ async function main() {
     return;
   }
 
+  const { maxTurns, retryDelayMs } = parseRetryOptions(args);
   const provider = args.provider || process.env.KOMITTO_PROVIDER || 'deepseek';
   const root = git(['rev-parse', '--show-toplevel']).trim();
 
@@ -34,28 +36,34 @@ async function main() {
   const context = args.context || process.env.KOMITTO_CONTEXT || '';
   const prompt = buildPrompt(diff, args.language || 'english', minWords, format, context);
 
-  let message;
+  let generate;
 
   if (provider === 'openai') {
-    message = await generateWithOpenAI(prompt, args.model);
+    generate = () => generateWithOpenAI(prompt, args.model);
   } else if (provider === 'claude' || provider === 'anthropic') {
-    message = await generateWithClaude(prompt, args.model);
+    generate = () => generateWithClaude(prompt, args.model);
   } else if (provider === 'gemini' || provider === 'google') {
-    message = await generateWithGemini(prompt, args.model);
+    generate = () => generateWithGemini(prompt, args.model);
   } else if (provider === 'deepseek') {
-    message = await generateWithDeepSeek(prompt, args.model);
+    generate = () => generateWithDeepSeek(prompt, args.model);
   } else {
     throw new Error(`unsupported provider: ${provider}. use openai, claude, gemini, or deepseek`);
   }
 
-  message = cleanMessage(message, format);
+  let message = await generateCommitMessageWithRetry({
+    generate,
+    format,
+    maxTurns,
+    retryDelayMs,
+    onRetry: ({ nextTurn, maxTurns: turnLimit, delayMs }) => {
+      console.error(
+        `empty commit message; retrying in ${delayMs / 1000}s (turn ${nextTurn}/${turnLimit})`
+      );
+    }
+  });
 
   if (args.lowercase) {
     message = message.toLowerCase();
-  }
-
-  if (!message) {
-    throw new Error('provider returned an empty commit message');
   }
 
   console.log(message);
