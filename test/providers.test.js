@@ -3,6 +3,7 @@ import test from 'node:test';
 import { generateWithOpenAI } from '../lib/providers/openai.js';
 import { generateWithClaude } from '../lib/providers/claude.js';
 import { generateWithDeepSeek } from '../lib/providers/deepseek.js';
+import { generateWithGemini } from '../lib/providers/gemini.js';
 
 const openAIResponse = {
   id: 'resp_test',
@@ -43,6 +44,14 @@ const claudeResponse = {
   stop_reason: 'end_turn',
   stop_sequence: null,
   usage: { input_tokens: 12, output_tokens: 30 }
+};
+
+const geminiResponse = {
+  candidates: [
+    { content: { role: 'model', parts: [{ text: 'feat: add login' }] }, finishReason: 'STOP', index: 0 }
+  ],
+  usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 5, totalTokenCount: 17 },
+  modelVersion: 'gemini-3.5-flash-lite'
 };
 
 function setEnv(values) {
@@ -219,4 +228,15 @@ test('claude fails fast instead of returning a message cut off at the token cap'
     ),
     { message: /output token cap/ }
   );
+});
+
+test('gemini default request omits the deprecated temperature setting', async () => {
+  const { text, request } = await captureRequest(
+    { env: { GEMINI_API_KEY: 'test-key', GEMINI_MODEL: undefined }, response: geminiResponse },
+    () => generateWithGemini('prompt')
+  );
+
+  assert.equal(text, 'feat: add login');
+  assert.match(request.url, /\/models\/gemini-flash-lite-latest:generateContent/);
+  assert.equal('temperature' in request.body.generationConfig, false);
 });
