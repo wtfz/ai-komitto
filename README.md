@@ -99,7 +99,7 @@ export GEMINI_MODEL="gemini-flash-lite-latest"
 ```bash
 export KOMITTO_PROVIDER="openai"
 export OPENAI_API_KEY="your_openai_api_key"
-export OPENAI_MODEL="gpt-5.4-nano"
+export OPENAI_MODEL="gpt-6-luna"
 ```
 
 ### Claude
@@ -115,7 +115,7 @@ export CLAUDE_MODEL="claude-haiku-4-5"
 ```bash
 export KOMITTO_PROVIDER="deepseek"
 export DEEPSEEK_API_KEY="your_deepseek_api_key"
-export DEEPSEEK_MODEL="deepseek-v4-flash"
+export DEEPSEEK_MODEL="deepseek-flash"
 ```
 
 DeepSeek is the default provider if `KOMITTO_PROVIDER` is not set.
@@ -240,7 +240,7 @@ Retry empty provider responses up to five total turns with a one-second linear d
 komitto --max-turns 5 --retry-delay 1
 ```
 
-The command stays open and reuses the same prompt. With the settings above, it waits 1, 2, 3, then 4 seconds after consecutive empty responses. Provider errors such as invalid credentials, rate limits, HTTP failures, and network failures are not retried. Set `--max-turns 1` to disable retries.
+The command stays open and reuses the same prompt. With the settings above, it waits 1, 2, 3, then 4 seconds after consecutive empty responses. Provider errors such as invalid credentials, rate limits, HTTP failures, and network failures are not retried. Neither are OpenAI or Claude responses cut off at the output token cap; komitto stops with an error instead of committing a partial message. Set `--max-turns 1` to disable retries.
 
 Set minimum word count for commit message:
 
@@ -346,9 +346,9 @@ Environment variables:
 | `ANTHROPIC_API_KEY` | Anthropic API key | none |
 | `DEEPSEEK_API_KEY` | DeepSeek API key | none |
 | `GEMINI_MODEL` | Gemini model | `gemini-flash-lite-latest` |
-| `OPENAI_MODEL` | OpenAI model | `gpt-5.4-nano` |
+| `OPENAI_MODEL` | OpenAI model | `gpt-6-luna` |
 | `CLAUDE_MODEL` | Claude model | `claude-haiku-4-5` |
-| `DEEPSEEK_MODEL` | DeepSeek model | `deepseek-v4-flash` |
+| `DEEPSEEK_MODEL` | DeepSeek model | `deepseek-flash` |
 | `KOMITTO_MAX_CHARS` | Maximum diff characters sent to the provider | `18000` |
 | `KOMITTO_MIN_WORDS` | Minimum words in the commit message | `12` |
 | `KOMITTO_FORMAT` | Commit format: `plain`, `conventional`, `gitmoji`, `full` | `conventional` |
@@ -386,9 +386,9 @@ The package uses lightweight defaults intended for low-cost commit message gener
 
 ```text
 gemini: gemini-flash-lite-latest
-openai: gpt-5.4-nano
+openai: gpt-6-luna
 claude: claude-haiku-4-5
-deepseek: deepseek-v4-flash
+deepseek: deepseek-flash
 ```
 
 The Gemini default intentionally uses the latest alias-style model name:
