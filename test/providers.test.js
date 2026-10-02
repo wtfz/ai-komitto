@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { generateWithOpenAI } from '../lib/providers/openai.js';
+import { generateWithClaude } from '../lib/providers/claude.js';
 import { generateWithDeepSeek } from '../lib/providers/deepseek.js';
 
 const openAIResponse = {
@@ -28,6 +29,20 @@ const deepSeekResponse = {
     { index: 0, message: { role: 'assistant', content: 'feat: add login' }, finish_reason: 'stop' }
   ],
   usage: { prompt_tokens: 12, completion_tokens: 5, total_tokens: 17 }
+};
+
+const claudeResponse = {
+  id: 'msg_test',
+  type: 'message',
+  role: 'assistant',
+  model: 'claude-sonnet-5-5',
+  content: [
+    { type: 'thinking', thinking: '', signature: 'sig_test' },
+    { type: 'text', text: 'feat: add login' }
+  ],
+  stop_reason: 'end_turn',
+  stop_sequence: null,
+  usage: { input_tokens: 12, output_tokens: 30 }
 };
 
 function setEnv(values) {
@@ -165,4 +180,43 @@ test('deepseek defaults to deepseek-flash', async () => {
 
   assert.equal(text, 'feat: add login');
   assert.equal(request.body.model, 'deepseek-flash');
+});
+
+test('claude requests omit temperature, which 4.7+ models reject', async () => {
+  const { request } = await captureRequest(
+    { env: { ANTHROPIC_API_KEY: 'test-key', CLAUDE_MODEL: undefined }, response: claudeResponse },
+    () => generateWithClaude('prompt', 'claude-sonnet-5-5')
+  );
+
+  assert.equal(request.body.model, 'claude-sonnet-5-5');
+  assert.equal('temperature' in request.body, false);
+});
+
+test('claude returns the text block that follows a thinking block', async () => {
+  const { text } = await captureRequest(
+    { env: { ANTHROPIC_API_KEY: 'test-key', CLAUDE_MODEL: undefined }, response: claudeResponse },
+    () => generateWithClaude('prompt', 'claude-sonnet-5-5')
+  );
+
+  assert.equal(text, 'feat: add login');
+});
+
+test('claude fails fast instead of returning a message cut off at the token cap', async () => {
+  const truncatedResponse = {
+    ...claudeResponse,
+    content: [
+      { type: 'thinking', thinking: '', signature: 'sig_test' },
+      { type: 'text', text: 'feat: add user avat' }
+    ],
+    stop_reason: 'max_tokens',
+    usage: { input_tokens: 12, output_tokens: 1024 }
+  };
+
+  await assert.rejects(
+    captureRequest(
+      { env: { ANTHROPIC_API_KEY: 'test-key', CLAUDE_MODEL: undefined }, response: truncatedResponse },
+      () => generateWithClaude('prompt', 'claude-sonnet-5-5')
+    ),
+    { message: /output token cap/ }
+  );
 });
