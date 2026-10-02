@@ -66,3 +66,23 @@ test('rejects invalid retry delay values', () => {
     );
   }
 });
+
+test('warns once per deprecated model and names the replacement', () => {
+  const warnings = [];
+
+  utils.warnIfDeprecated('gpt-5.4-nano', (message) => warnings.push(message));
+  utils.warnIfDeprecated('gpt-5.4-nano', (message) => warnings.push(message));
+
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /gpt-5\.4-nano.*gpt-6-luna/);
+});
+
+test('does not warn for current or unknown models', () => {
+  const warnings = [];
+
+  for (const model of ['gpt-6-luna', 'deepseek-flash', 'constructor']) {
+    utils.warnIfDeprecated(model, (message) => warnings.push(message));
+  }
+
+  assert.deepEqual(warnings, []);
+});
