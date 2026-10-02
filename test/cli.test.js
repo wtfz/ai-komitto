@@ -25,7 +25,7 @@ function createRepository() {
   return repository;
 }
 
-function runKomitto(repository, args, responses) {
+function runKomitto(repository, args, responses, env = {}) {
   const runner = `
     const responses = JSON.parse(process.env.KOMITTO_TEST_RESPONSES);
     globalThis.fetch = async () => ({
@@ -45,7 +45,8 @@ function runKomitto(repository, args, responses) {
       ...process.env,
       DEEPSEEK_API_KEY: 'test-key',
       KOMITTO_TEST_ARGS: JSON.stringify(args),
-      KOMITTO_TEST_RESPONSES: JSON.stringify(responses)
+      KOMITTO_TEST_RESPONSES: JSON.stringify(responses),
+      ...env
     }
   });
 }
@@ -87,6 +88,25 @@ test('normal mode creates one commit after receiving a message', () => {
     assert.equal(result.status, 0, result.stderr);
     assert.equal(git(repository, ['rev-list', '--count', 'HEAD']), '2');
     assert.equal(git(repository, ['log', '-1', '--pretty=%s']), 'fix: commit after message generation');
+  } finally {
+    rmSync(repository, { recursive: true, force: true });
+  }
+});
+
+test('warns once on stderr when the configured model is deprecated', () => {
+  const repository = createRepository();
+
+  try {
+    const result = runKomitto(
+      repository,
+      ['--print', '--provider', 'deepseek', '--max-turns', '2', '--retry-delay', '0'],
+      ['', 'feat: warn about deprecated models'],
+      { DEEPSEEK_MODEL: 'deepseek-v4-flash' }
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), 'feat: warn about deprecated models');
+    assert.equal(result.stderr.match(/deepseek-v4-flash.*deepseek-flash/g)?.length, 1);
   } finally {
     rmSync(repository, { recursive: true, force: true });
   }

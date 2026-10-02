@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { generateWithOpenAI } from '../lib/providers/openai.js';
+import { generateWithDeepSeek } from '../lib/providers/deepseek.js';
 
 const openAIResponse = {
   id: 'resp_test',
@@ -17,6 +18,16 @@ const openAIResponse = {
     }
   ],
   usage: { input_tokens: 12, output_tokens: 5, total_tokens: 17 }
+};
+
+const deepSeekResponse = {
+  id: 'chat_test',
+  object: 'chat.completion',
+  model: 'deepseek-flash',
+  choices: [
+    { index: 0, message: { role: 'assistant', content: 'feat: add login' }, finish_reason: 'stop' }
+  ],
+  usage: { prompt_tokens: 12, completion_tokens: 5, total_tokens: 17 }
 };
 
 function setEnv(values) {
@@ -144,4 +155,14 @@ test('openai fails fast instead of returning a message cut off at the token cap'
     ),
     { message: /output token cap/ }
   );
+});
+
+test('deepseek defaults to deepseek-flash', async () => {
+  const { text, request } = await captureRequest(
+    { env: { DEEPSEEK_API_KEY: 'test-key', DEEPSEEK_MODEL: undefined }, response: deepSeekResponse },
+    () => generateWithDeepSeek('prompt')
+  );
+
+  assert.equal(text, 'feat: add login');
+  assert.equal(request.body.model, 'deepseek-flash');
 });
